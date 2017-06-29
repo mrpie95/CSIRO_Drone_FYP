@@ -73,18 +73,24 @@ def _find_devices():
     """
     ret = []
 
+    print "VEN:",   CRADIO_VID
+    print "PRO:",   CRADIO_PID
+
     if pyusb1:
-        for d in usb.core.find(idVendor=0x1915, idProduct=0x7777, find_all=1,
-                               backend=pyusb_backend):
+        for d in usb.core.find(idVendor=0x1915, idProduct=0x7777, find_all=1,backend=pyusb_backend):
+            print('if')
             ret.append(d)
     else:
         busses = usb.busses()
         for bus in busses:
             for device in bus.devices:
+                
+                print "ven:",   device.idVendor
+                print "pro:",   device.idProduct
                 if device.idVendor == CRADIO_VID:
                     if device.idProduct == CRADIO_PID:
                         ret += [device, ]
-
+                        print"Found Radio\n"
     return ret
 
 
