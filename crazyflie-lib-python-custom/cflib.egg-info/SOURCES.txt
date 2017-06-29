@@ -1,4 +1,5 @@
 setup.cfg
+setup.py
 cflib/__init__.py
 cflib.egg-info/PKG-INFO
 cflib.egg-info/SOURCES.txt

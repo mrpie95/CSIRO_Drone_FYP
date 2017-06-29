@@ -323,7 +323,6 @@ class RadioDriver(CRTPDriver):
             try:
                 self._radio_manager = _RadioManager(0)
             except Exception:
-                print("ERROR: NO RADIO FOUND")
                 return []
 
         with self._radio_manager as cradio:
