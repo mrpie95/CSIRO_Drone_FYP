@@ -1,3 +1,3 @@
-cflib
 test
+cflib
 lpslib

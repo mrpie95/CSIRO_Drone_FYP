@@ -30,6 +30,7 @@ and prints it to the console. After 10s the application disconnects and exits.
 import logging
 import time
 from threading import Timer
+from threading import Thread
 
 import cflib.crtp  # noqa
 from cflib.crazyflie import Crazyflie
@@ -43,13 +44,21 @@ class LoggingExample:
     """
     Simple logging example class that logs the Stabilizer from a supplied
     link uri and disconnects after 5s.
+    
     """
+    
 
     def __init__(self, link_uri):
         """ Initialize and run the example with the specified link_uri """
 
         # Create a Crazyflie object without specifying any cache dirs
         self._cf = Crazyflie()
+        
+        #functions used for motors
+        self._cf.connected.add_callback(self._connected)
+        self._cf.disconnected.add_callback(self._disconnected)
+        self._cf.connection_failed.add_callback(self._connection_failed)
+        self._cf.connection_lost.add_callback(self._connection_lost)
 
         # Connect some callbacks from the Crazyflie API
         self._cf.connected.add_callback(self._connected)
@@ -68,25 +77,35 @@ class LoggingExample:
     def _connected(self, link_uri):
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
+        
         print('Connected to %s' % link_uri)
 
         # The definition of the logconfig can be made before connecting
-        self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=10)
-        self._lg_stab.add_variable('stabilizer.roll', 'float')
-        self._lg_stab.add_variable('stabilizer.pitch', 'float')
-        self._lg_stab.add_variable('stabilizer.yaw', 'float')
+        self._lg_acc = LogConfig(name='Accel', period_in_ms=10)
+        #self._lg_acc.add_variable('mag.x', 'float')
+        #self._lg_acc.add_variable('mag.y', 'float')
+        self._lg_acc.add_variable('mag.z', 'float')
+        
+        #self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=10)
+        #self._lg_stab.add_variable('stabilizer.roll', 'float')
+        #self._lg_stab.add_variable('stabilizer.pitch', 'float')
+        #self._lg_stab.add_variable('stabilizer.yaw', 'float')
+
 
         # Adding the configuration cannot be done until a Crazyflie is
         # connected, since we need to check that the variables we
         # would like to log are in the TOC.
         try:
-            self._cf.log.add_config(self._lg_stab)
+            self._cf.log.add_config(self._lg_acc)
             # This callback will receive the data
-            self._lg_stab.data_received_cb.add_callback(self._stab_log_data)
+            self._lg_acc.data_received_cb.add_callback(self._stab_log_data)
+            
+            
             # This callback will be called on errors
-            self._lg_stab.error_cb.add_callback(self._stab_log_error)
+            self._lg_acc.error_cb.add_callback(self._stab_log_error)
             # Start the logging
-            self._lg_stab.start()
+            self._lg_acc.start()
+             
         except KeyError as e:
             print('Could not start log configuration,'
                   '{} not found in TOC'.format(str(e)))
@@ -94,16 +113,23 @@ class LoggingExample:
             print('Could not add Stabilizer log config, bad configuration.')
 
         # Start a timer to disconnect in 10s
-        t = Timer(5, self._cf.close_link)
+        t = Timer(20, self._cf.close_link)
         t.start()
 
     def _stab_log_error(self, logconf, msg):
-        """Callback from the log API when an error occurs"""
+##        """Callback from the log API when an error occurs"""
         print('Error when logging %s: %s' % (logconf.name, msg))
+    
 
     def _stab_log_data(self, timestamp, data, logconf):
         """Callback froma the log API when data arrives"""
-        print('[%d][%s]: %s' % (timestamp, logconf.name, data))
+        global maxi
+        #print('[%s]: %s\n' % (logconf.name, data))
+        #if data > maxi:
+        maxi = data
+            
+        print('[%s]: %s\n' % (logconf.name, data))
+        Thread(target=self._ramp_motors).start()
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
@@ -120,9 +146,44 @@ class LoggingExample:
         """Callback when the Crazyflie is disconnected (called in all cases)"""
         print('Disconnected from %s' % link_uri)
         self.is_connected = False
+        
+    #def _connected(self, link_uri):
+        
+
+    def _ramp_motors(self):
+       	global maxi
+       	
+        #j = int(maxi[0])*5000
+        
+        j = int(maxi['mag.z'])*4000
+        
+        if j < 0:
+            j = 0
+        elif j > 60000:
+            j = 60000
+            
+        #for item in maxi:
+         #   j = int(item)
+            
+        thrust_mult = 1
+        thrust_step = 500
+        thrust = 20000
+        pitch = 0
+        roll = 0
+        yawrate = 0
+
+        # Unlock startup thrust protection
+        self._cf.commander.send_setpoint(0, 0, 0, 0)
+        print j
+        #time.sleep(0.1)
+        self._cf.commander.send_setpoint(roll, pitch, yawrate, j)
+        time.sleep(0.1)
+
 
 
 if __name__ == '__main__':
+    global maxi
+    maxi = 0.0
     # Initialize the low-level drivers (don't list the debug drivers)
     cflib.crtp.init_drivers(enable_debug_driver=False)
     # Scan for Crazyflies and use the first one found
