@@ -84,7 +84,7 @@ class LoggingExample:
         self._lg_acc = LogConfig(name='Accel', period_in_ms=10)
         #self._lg_acc.add_variable('mag.x', 'float')
         #self._lg_acc.add_variable('mag.y', 'float')
-        self._lg_acc.add_variable('mag.z', 'float')
+        self._lg_acc.add_variable('test.TESTVARIABLE', 'float')
         
         #self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=10)
         #self._lg_stab.add_variable('stabilizer.roll', 'float')
@@ -129,7 +129,7 @@ class LoggingExample:
         maxi = data
             
         print('[%s]: %s\n' % (logconf.name, data))
-        Thread(target=self._ramp_motors).start()
+        #Thread(target=self._ramp_motors).start()
 
     def _connection_failed(self, link_uri, msg):
         """Callback when connection initial connection fails (i.e no Crazyflie
