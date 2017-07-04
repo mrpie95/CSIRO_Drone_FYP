@@ -1,21 +1,8 @@
-# cflib: Crazyflie python library [![Build Status](https://api.travis-ci.org/bitcraze/crazyflie-lib-python.svg)](https://travis-ci.org/bitcraze/crazyflie-lib-python)
+# cflib: Crazyflie python library 
 
 cflib is an API written in Python that is used to communicate with the Crazyflie
 and Crazyflie 2.0 quadcopters. It is intended to be used by client software to
-communicate with and control a Crazyflie quadcopter. For instance the [cfclient][cfclient] Crazyflie PC client uses the cflib.
-
-See [below](#platform-notes) for platform specific instruction.
-For more info see our [wiki](http://wiki.bitcraze.se/ "Bitcraze Wiki").
-
-
-## Development
-### Developing for the cfclient
-* [Fork the cflib](https://help.github.com/articles/fork-a-repo/)
-* [Clone the cflib](https://help.github.com/articles/cloning-a-repository/), `git clone git@github.com:YOUR-USERNAME/crazyflie-lib-python.git`
-* [Install the cflib in editable mode](http://pip-python3.readthedocs.org/en/latest/reference/pip_install.html?highlight=editable#editable-installs), `pip install -e path/to/cflib` 
-* [Uninstall the cflib](http://pip-python3.readthedocs.org/en/latest/reference/pip_uninstall.html), `pip uninstall cflib`
-
-Note: If you are developing for the [cfclient][cfclient] you must use python3.
+communicate with and control a Crazyflie quadcopter. 
 
 ### Linux, OSX, Windows
 * Build a [virtualenv (local python environment)](https://virtualenv.pypa.io/en/latest/) with package dependencies
@@ -26,11 +13,6 @@ Note: If you are developing for the [cfclient][cfclient] you must use python3.
 * Activate the environment: `source venv/bin/activate`
 * Connect the crazyflie and run an example: `python -m examples.basiclog`
 * Deactivate the virtualenv if you activated it `deactivate`
-
-Note: For systems that support [make](https://www.gnu.org/software/make/manual/html_node/Simple-Makefile.html), the first four steps can be replaced with `make venv`
-
-Note: The first three steps can be skipped if you don't mind installing cflib dependencies system-wide.
-
 
 # Testing
 ### With docker and the toolbelt
@@ -77,8 +59,3 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE="0664"
 ```
 
 [cfclient]: https://www.github.com/bitcraze/crazyflie-clients-python
-
-
-## Contribute
-
-Everyone is encouraged to contribute to the CrazyFlie library by forking the Github repository and making a pull request or opening an issue.
