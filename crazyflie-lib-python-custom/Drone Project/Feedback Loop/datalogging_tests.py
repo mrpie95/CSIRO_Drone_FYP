@@ -84,7 +84,7 @@ class LoggingExample:
         self._lg_acc = LogConfig(name='Accel', period_in_ms=10)
         #self._lg_acc.add_variable('mag.x', 'float')
         #self._lg_acc.add_variable('mag.y', 'float')
-        self._lg_acc.add_variable('test.TESTVARIABLE', 'float')
+        self._lg_acc.add_variable('test.VARIABLE', 'float')
         
         #self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=10)
         #self._lg_stab.add_variable('stabilizer.roll', 'float')
