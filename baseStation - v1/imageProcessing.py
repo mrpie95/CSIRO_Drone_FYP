@@ -102,6 +102,7 @@ class imageProcessing():
         self.cam.capture(self.videoStream, format="bgr", use_video_port=True)
   
         image = self.videoStream.array
+        HUD = image.copy()
         
         blueImage = self.processImage(image, "blue")
         bluePos = self.calculatePosition(blueImage, "blue")
@@ -113,9 +114,6 @@ class imageProcessing():
         position = None
         
         if greenPos!=None and bluePos!=None:
-            #position = (, ,
-            
-            
             
             posX = abs(bluePos[0]-greenPos[0])
             posY = abs(bluePos[1]-greenPos[1])
@@ -127,21 +125,40 @@ class imageProcessing():
             elif bluePos[0] > greenPos[0]:
                 posX = posX/2+greenPos[0]
                 posY = posY/2+greenPos[1]
-                
-            currentPos = dataTypes.droneData(x=posX, y=posY, z=posR, blueX=bluePos[0], blueY=bluePos[1], blueZ=bluePos[2], greenX=greenPos[0], greenY=greenPos[1], greenZ=greenPos[2])
             
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(img=HUD, text=("x: "+str(posX)+" y: "+str(posY)), org=(posX+50,posY), fontFace=font, color=(255,255,255),fontScale=0.5, lineType=cv2.LINE_AA)
+            
+                
+            currentPos = dataTypes.droneData(x=posX, y=posY, z=posR, direction=None, blueX=bluePos[0], blueY=bluePos[1],
+                                             blueZ=bluePos[2], greenX=greenPos[0], greenY=greenPos[1], greenZ=greenPos[2], detected=False, inRadius=False)
             position = (posY,posX,posR)
-            cv2.circle(image, (position[1], position[0]), position[2], (0,255,255),thickness=10,lineType=8, shift=0)
+            cv2.circle(HUD, (position[1], position[0]), position[2], (0,255,255),thickness=-10,lineType=8, shift=0)
             
         """if (bluePos!=None):
             print("x: "+str(bluePos[0])+" y: "+str(bluePos[1])+" radius: "+str(bluePos[2]))
         
         if (greenPos!=None):
             print("x: "+str(greenPos[0])+" y: "+str(greenPos[1])+" radius: "+str(greenPos[2])) """  
+        center = (int(self.resolution[0]/2),int(self.resolution[1]/2))
+        radius = 50
         
+        if currentPos != None:
+            if currentPos.x < (center[0]+radius/2) and currentPos.x > (center[0]-radius/2) and currentPos.y < (center[1]+radius/2) and currentPos.y > (center[1]-radius/2):
+                cv2.circle(HUD, center, radius, (55,255,125),thickness=10,lineType=8, shift=0)
+                currentPos = dataTypes.droneData(x=posX, y=posY, z=posR, direction=None, blueX=bluePos[0], blueY=bluePos[1],
+                                             blueZ=bluePos[2], greenX=greenPos[0], greenY=greenPos[1], greenZ=greenPos[2], detected=True, inRadius=True)
+            else:
+                cv2.circle(HUD, center, radius, (255,255,255),thickness=10,lineType=8, shift=0)
+                currentPos = dataTypes.droneData(x=posX, y=posY, z=posR, direction=None, blueX=bluePos[0], blueY=bluePos[1],
+                                             blueZ=bluePos[2], greenX=greenPos[0], greenY=greenPos[1], greenZ=greenPos[2], detected=True, inRadius=False)
+        else:
+            cv2.circle(HUD, center, radius, (3,225,225),thickness=10,lineType=8, shift=0)
         
         cv2.imshow("Blue Processing", blueImage)
         cv2.imshow("Green Processing", greenImage)
+        cv2.imshow("HUD", HUD)
+        
         
         cv2.imshow("Original", image)
         key = cv2.waitKey(1) & 0xFF

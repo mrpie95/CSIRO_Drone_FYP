@@ -8,10 +8,9 @@ class flightController:
     #currentPos = None
     #targetPos = None
     droneData = None
-    
-    
-    def __init__(self, resolution,goalPos):
-        self.goalPos = goalPos
+    moveMag = 5 #movement mangnitude - degrees
+    initDirection = 0
+    ready = False
     
     def getDirection(self):
         dirErr = 3
@@ -23,15 +22,7 @@ class flightController:
         
         X=float(abs(bluePos.x-greenPos.x))
         Y=float(abs(bluePos.y-greenPos.y))
-        #print("---")
-        #print(bluePos)
-       # print(greenPos)
-        #print(X)
-        #print(Y)
-           
-        #print(math.degrees(math.atan(26.01/124.09)))
-        result = None
-       
+
         try:
             if (bluePos.x < greenPos.x and bluePos.y < greenPos.y):
                 return math.degrees(math.atan(X/Y))
@@ -54,13 +45,39 @@ class flightController:
 
         return result
     
-    def getTargetPos(self, droneData):
-        self.droneData = droneData
+    def __init__(self, resolution,goalPos, currentPos):
+        self.droneData = currentPos
+        self.goalPos = goalPos
+        self.initDirection = self.getDirection()
+    
+    def angleCompensation(self):
+        angle = self.getDirection()
+        return dt.drone2D(pitch=math.sin(angle), roll=math.cose(angle))
+         
         
-        #get angle of the drone: 0 is when the drone ready for landing
-        direction = self.getDirection()
+    
+    def getMovementVector(self, goalPos):
+        pitch = 0
+        roll = 0
+        yall = 0
         
-        return None
+        angleComp = self.angleCompensation()
+        
+        if (self.droneData.x > goalPos[0]):
+            pitch = 5
+        else:
+            pitch = -5
+        
+        if (self.droneData.y > goalPos[1]):
+            roll = 5
+        else:
+            roll = -5
+        
+        pitch = pitch*angleCom.x
+        roll = pitch*angleCom.x
+        
+        return dt.droneMovment(pitch=pitch, roll=roll, yall=yall)
+
     
     
         

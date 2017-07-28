@@ -6,12 +6,14 @@ from threading import Thread
 from collections import namedtuple
 from cflib.crazyflie import Crazyflie
 
+from cflib.crazyflie.log import LogConfig
+
 logging.basicConfig(level=logging.ERROR)
 
 
 class DroneController:
-    """Example that connects to a Crazyflie and ramps the motors up/down and
-    the disconnects"""
+    initDirection = 0
+    init = True
 
     def __init__(self):
         # Initialize the low-level drivers (don't list the debug drivers)
@@ -53,16 +55,54 @@ class DroneController:
  
     def _connected(self, link_uri):
         print("Connected to crazyflie")
+        
+        self._lg_stab = LogConfig(name='Stabilizer', period_in_ms=10)
+       #self._lg_stab.add_variable('stabilizer.roll', 'float')
+        #self._lg_stab.add_variable('stabilizer.pitch', 'float')
+        self._lg_stab.add_variable('stabilizer.yaw', 'float')
+        
+        try:
+            self._cf.log.add_config(self._lg_stab)
+            # This callback will receive the data
+            self._lg_stab.data_received_cb.add_callback(self.logStabData)
+            
+            
+            # This callback will be called on errors
+           # self._lg_acc.error_cb.add_callback(self._stab_log_error)
+            # Start the logging
+            self._lg_stab.start()
+             
+        except KeyError as e:
+            print('Could not start log configuration,'
+                  '{} not found in TOC'.format(str(e)))
+        except AttributeError:
+            print('Could not add Stabilizer log config, bad configuration.')
+    
+    def logStabData(self, timestamp, data, logconf):
+        if self.init:
+            self.initDirection = data['stabilizer.yaw']
+         #   print(data['stabilizer.yaw'])
+            self.init = False
+        #print(data['stabilizer.yaw'])
+        self.initDirection =  timestamp #data['stabilizer.yaw']
+        #print('[%s]: %s\n' % (logconf.name, data))
+        
+        
+        
+        
        # Thread(target=self._ramp_motors).start()
     #1def calculate
-    def setMotors(self):
+    
+       
+    def setMotors(self, value):
         #unlocks drone - allows the use of the setpoint command
         #self._cf.commander.send_setpoint(roll, pitch, yawrate, thrust)
+        print("motors on")
         
         self._cf.commander.send_setpoint(0, 0, 0, 0)
-        	
-        self._cf.commander.send_setpoint(0, 0, 0, 10000)
-        #time.sleep(0.05)
+        time.sleep(0.1)
+        self._cf.commander.send_setpoint(0, 0, 0, value)
+        time.sleep(0.1)
 
     def _ramp_motors(self):
        	j = input('Choose a ramp: ')
@@ -92,4 +132,4 @@ class DroneController:
         # Make sure that the last packet leaves before the link is closed
         # since the message queue is not flushed before closing
         time.sleep(0.1)
-        self._cf.close_link()
+        #self._cf.close_link()
