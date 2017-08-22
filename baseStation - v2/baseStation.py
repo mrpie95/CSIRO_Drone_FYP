@@ -1,89 +1,94 @@
 import sys
 import threading
 import imageProcessing as ip
-import droneController as dc
+#import droneController2 as dc
 import dataTypes as dt
 import flightController as fc
 import time
+
+import logging
+import cflib
+
+from collections import namedtuple
+from cflib.crazyflie import Crazyflie
+from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
+#from cflib.crazyflie.log import LogConfig
+
 #import GUIControls
+
+
 
 def main():
     
+    URI = "radio://0/80/250K"
     resolution = (320,224)
     goalPos = dt.pos2D(resolution[0]/2, resolution[1]/2)
     init = True
     takeoffTimer = 0
     lostDroneTimer = 0
-    
+    cf = None;
     
     image = ip.imageProcessing(resolution, True)
-    drone = dc.DroneController()
-        
-    while(True):
-        #get current drone data data9 center
-        droneData = image.readStream()
-        
-        #intialisation of drone and flight controller
-        if droneData != None and init:
-            
-            #flightCon.droneData = currentPos
-            flightCon = fc.flightController(resolution, goalPos, droneData)
-            
-            #print(flightCon.droneData)
-            #currentPos.direction = drone.initDirection 
-            #flightCon.initDirection = drone.initDirection# currentPos.direction
-           # print(drone.initDirection)
-            init = False
-        
-        elif droneData != None:
-            flightCon.droneData = droneData
-            
-            if droneData.inRadius:# or flightCon.ready:
-                
-                #if flightCon.ready:
-                
-                    #moveVec = flightCon.getMovementVector()
-                    #drone.setMotors(moveVec.pitch, moveVex.roll, moveVec.yall, 0)
-                
-                    #print("ready")
-                    #drone.setMotors()
-                    #print("takeoff")
-                    #drone.setMotors(35000)
-                if takeoffTimer > 10:
-                    #drone._ramp_motors()
-                   # drone.setMotors(35000)
-                    print("takeoff")
-                    flightCon.ready = True
-		    flightCon.angleCompensation()
+    #drone = dc.DroneController()
 
-                    #drone.setMotors(flightController.getTarget())
-                    
-                else:
-                    takeoffTimer += 1
-                    
-            elif not droneData.detected:
-		lostDroneTimer += 1
-
-		if lostDroneTimer > 5:
-	                print("power off detected")
-                #drone.setMotors(0)
-            else:
-                print("power off radius")
-                takeoffTimer = 0
+    cflib.crtp.init_drivers(enable_debug_driver=False)
+    with SyncCrazyflie(URI) as scf:
+	    cf = initialiseDrone(scf)
+	    
+        
+	    while(True):
+	        #get current drone data data center
+	        droneData = image.readStream()
+	
+	        if droneData != None and init:
+	            flightCon = fc.flightController(resolution, goalPos, droneData)
+	            init = False
+	        
+	        elif droneData != None:
+	            flightCon.droneData = droneData
+	            
+	            if droneData.inRadius:# or flightCon.ready:
+	                if takeoffTimer > 10:
+			    runTest(cf) 
+	                    print("takeoff")
+	                    flightCon.ready = True
+			    flightCon.angleCompensation()
+	                    
+	                else:
+	                    takeoffTimer += 1
+	                    
+	            elif not droneData.detected:
+			lostDroneTimer += 1
+	
+			if lostDroneTimer > 5:
+		            print("power off detected")
+	              
+	            else:
+	                print("power off radius")
+	                takeoffTimer = 0
 		lostDroneTimer = 0
 
-                #drone.setMotors(0)
-            
-                
-            #print(droneData.inRadius)
-            
-            #direction = flightCon.getDirection()
-            #print("direction - " + str(flightCon.initDirection))
-    #   drone.setMotors(goalPos)
-        
-        #if (position!=None):
-         #   print("x: "+str(position[0])+" y: "+str(position[1])+" radius: "+str(position[2]))
-            
+def initialiseDrone(scf):
+        cf = scf.cf
+	cf.param.set_value('kalman.resetEstimation', '1')
+        time.sleep(0.1)
+	cf.param.set_value('kalman.resetEstimation', '0')
+	time.sleep(2) 
+	return cf
+	
+def runTest(cf):
+	#cflib.crtp.init_drivers(enable_debug_driver=False)
+	print("power on")
+	#self.cf.commander.send_hover_setpoint(0,0,0,0.1)
+	
+	#cf = self.scf.cf
+	#if scf != None:
+            #print(self.scf)
+
+	for _ in range(5):
+            cf.commander.send_hover_setpoint(0,0,0,0.1)
+            time.sleep(0.1)
     
 if __name__=="__main__":
+    print("main")
     main()
