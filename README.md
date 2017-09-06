@@ -1,7 +1,7 @@
-# CSIRO_Drone_FYP
+# Swinburne Final Year Drone Project
 
-This repository contains all the files used in the CSIRO Drone Project
+This repository contains all the files used in the project
+
+## Base Station p
 
 ## Python Libaries
-
-## Custom Firmware
