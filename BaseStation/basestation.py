@@ -5,7 +5,7 @@ import imageProcessing as ip
 import cflib.crtp
 
 URI = "radio://0/80/250K"
-RESOLUTION = (300,300)
+
 
 from cflib.crazyflie.log import LogConfig
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
@@ -19,15 +19,22 @@ logging.basicConfig(level=logging.ERROR)
 if __name__ == '__main__':
     # Initialize the low-level drivers (don't list the debug drivers)
     cflib.crtp.init_drivers(enable_debug_driver=False)
-    camera = ip.imageProcessing(RESOLUTION, True)
+    #camera = ip.imageProcessing(RESOLUTION, True)
 
-    while(True):
+    #>>>Program Starts Here<<<
+
+    with SyncCrazyflie(URI) as scf:
+	    baseStation = fc.flightController(scf)
+			
+			while(True):
+				
+				
 		droneData = camera.readStream()
 		if droneData != None:
 		    print(dp.angleCompensation(0,1,1,2, droneData.detected))
 		
 
-    with SyncCrazyflie(URI) as scf:
+    
         cf = dp.initDrone(scf)
 	height = 0.4
 

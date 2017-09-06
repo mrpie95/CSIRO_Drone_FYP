@@ -1,4 +1,4 @@
-"""These are the standard functions used to control the drone
+oh also """These are the standard functions used to control the drone
 over the base station. They have been specifically tuned to flying
 over the 300mm x 300mm base station."""
 
@@ -31,7 +31,7 @@ def initDrone(scf):
 def closeConnection(cf):
 	cf.commander.send_stop_setpoint()
 
-#take off the compenstates for some of the drone drifting
+#take off compenstates for some of the drone drifting
 def takeoff(cf, height):
     print("hovering")	
     cf.commander.send_hover_setpoint(0,0,0,height+0.15)
@@ -100,53 +100,7 @@ def incrementBackward(cf, height):
         time.sleep(0.1)
     print("moved backward")
 
-#gives the angle that will can needs to rotate to align with the base
-def angleCompensation(x1,y1,x2,y2, wall):
-    X=float(abs(x1-x2))
-    Y=float(abs(y1-y2))
-    result = None
-    
-    try:
-        angle = math.degrees(math.atan(Y/X))
 
-        #south wall
-        if wall.south:
-            if ((x1>=x2)and(y1>=y2)):
-                result = -1*angle
-            elif ((x1<=x2)and(y1>=y2)):
-                result = angle
-
-         #east wall
-        elif wall.east:
-            if ((x1>=x2)and(y1<=y2)):
-                result = (-1*(angle+90))
-            elif ((x1>=x2)and(y1>=y2)):
-                result = -1*(90-angle)
-
-        #north wall
-        if wall.north:
-            if ((x1<=x2)and(y1<=y2)):
-                result = (180-angle)
-            elif ((x1>=x2)and(y1<=y2)):
-                result = (-1*(180-angle))
-
-        #west wall
-        elif wall.west:
-            if ((x1<=x2)and(y1>=y2)):
-                result = (90-angle)
-            elif ((x1<=x2)and(y1<=y2)):
-                result = (angle+90)
-          
-    except ZeroDivisionError:
-         return "error"
-
-    if result == None:
-        return None
-
-    if result >= 360:
-        result -= 360
-
-    return result
 
 #general purpose logging function - can be used for any 
 #variable in the drones LOC
@@ -161,6 +115,7 @@ def logParameter(scf, parameter, Type):
             break
 
 #gets the current relative direction of the drone
+#NOTE ADD AVERAGING FUNCITON FOR ACCURACY
 def getDirection(scf):
     data = LogConfig(name='data', period_in_ms=10)
     data.add_variable('stabilizer.yaw', 'float')
