@@ -5,15 +5,19 @@ import droneProtocols as dp
 
 class flightController:
     RESOLUTION = (300,300)
+    LANDING_ACCURACY = 10
 
+    #global Variables
     pos1 = None
     pos2 = None
     compensationAngle = 0
 
+    #global objects
     drone = None
     camera = None
     connection = None
    
+	#initialise camera and drone connnections    
     def __init__(self, scf):
 	self.connection = scf
 	self.drone = dp.initDrone(self.connection)
@@ -27,16 +31,27 @@ class flightController:
 	dp.incrementForward(drone,height)
 	dp.hover(drone,height)
 	self.pos2 = camera.readStream()
-	self.compensationAngle = self.calcCom(pos1.x,pos1.y,pos2.x,pos2.y,pos1.detected)
-	dp.rotate(drone,connection,self.compensationAngle,height)
+	self.compensationAngle = self.calcComp(pos1.x,pos1.y,pos2.x,pos2.y,pos1.detected)
+	dp.rotateBy(drone,connection,self.compensationAngle,height)
 	
-	
-	
-	self.position1 = 
-	
-	dp.rotate(drone, 
+	position = None
 
-        //compensationAngle = dp.getDirection(connection)
+	while(True):
+		position = camera.readStream()
+		if (position.x < (RESOLUTION[0]+LANDING_ACCURACY))
+			dp.incrementForward(drone,height)
+		elif (position.x > (RESOLUTION[0]+LANDING_ACCURACY))
+			dp.incrementBackward(drone,height)
+
+	while(True):
+		position = camera.readStream()
+		if (position.y < (RESOLUTION[1]+LANDING_ACCURACY))
+			dp.incrementForward(drone,height)
+		elif (position.y > (RESOLUTION[1]+LANDING_ACCURACY))
+			dp.incrementBackward(drone,height)
+	
+	dp.landDrone(drone,height)
+	
 
 
     #gives the angle that will can needs to rotate to align with the base
