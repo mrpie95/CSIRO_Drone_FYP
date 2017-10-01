@@ -2,6 +2,7 @@ import logging
 import time
 import droneProtocols as dp
 import imageProcessing as ip
+import flightController as fc
 import cflib.crtp
 
 URI = "radio://0/80/250K"
@@ -19,35 +20,50 @@ logging.basicConfig(level=logging.ERROR)
 if __name__ == '__main__':
     # Initialize the low-level drivers (don't list the debug drivers)
     cflib.crtp.init_drivers(enable_debug_driver=False)
-    #camera = ip.imageProcessing(RESOLUTION, True)
 
     #>>>Program Starts Here<<<
+    height = 0.3
+	
+    with SyncCrazyflie(URI) as scf:  
+	baseStation = fc.flightController(scf)
+	#baseStation.testFlight()
+	#baseStation.hoverAboveBase(height)
+	#baseStation.rotDrone2Base(height)
 
-    with SyncCrazyflie(URI) as scf:
-	    baseStation = fc.flightController(scf)
-			
-			while(True):
-				
-				
-		droneData = camera.readStream()
-		if droneData != None:
-		    print(dp.angleCompensation(0,1,1,2, droneData.detected))
+	baseStation.searchForBase(height)
+
+	#baseStation.testFlight()
+	#baseStation.emergencyLand()
+	
+	"""while(True):
+	    statues = baseStation.approuchBase()
+   	    print(statues)
+            if (statues):
+	        print("approuch complete")
+	        baseStation.landDrone()
+	        break"""
+	
+	""""while(True):
+	    #baseStation.readCamera()
+	    statues = baseStation.approuchBase()
+   	    print(statues)
+            if (statues):
+	    	baseStation.landDrone()"""
+
+	
+	#if (statues):
+	   # baseStation.landDrone()
+	
+
 		
-
-    
-        cf = dp.initDrone(scf)
-	height = 0.4
-
-	dp.takeoff(cf, height)
-	dp.rotateTo(cf, scf, 180, 0.3)
-	dp.land(cf, height)
-
-
-	"""dp.takeoff(cf, height)
-	dp.incrementForward(cf, height)
-	dp.hover(cf,height)
-	dp.incrementBackward(cf, height)
-	dp.hover(cf,height)
-	dp.land(cf, height)"""
-
-	dp.closeConnection(cf)
+   	"""statues = baseStation.approuchBase()
+	while(True):
+    	baseStation.testFlight()
+    	baseStation.emergencyLand()
+	
+    	if (statues):
+	baseStation.landDrone()
+   	else:
+	    print("Drone missing, emergency")
+		baseStation.emergencyLand()"""
+            

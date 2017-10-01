@@ -1,0 +1,121 @@
+#droneData = camera.readStream()
+	    
+            if droneData != None:
+		    print(dp.angleCompensation(0,1,1,2, droneData.detected))
+		
+
+    
+        cf = dp.initDrone(scf)
+	height = 0.4
+
+	dp.takeoff(cf, height)
+	dp.rotateTo(cf, scf, 180, 0.3)
+	dp.land(cf, height)
+
+
+	"""dp.takeoff(cf, height)
+	dp.incrementForward(cf, height)
+	dp.hover(cf,height)
+	dp.incrementBackward(cf, height)
+	dp.hover(cf,height)
+	dp.land(cf, height)"""
+
+	dp.closeConnection(cf)
+
+
+
+  def matchDroneBaseRotation(self):
+	print("Aliging Drone")
+
+	#record intial drone position
+	pos1 = self.getPosition(height)
+	if pos1 == None:
+	    print("not pos1 lock")
+	    return False
+	print("pos1 lock")
+	print(pos1)
+		
+	dp.incrementForward(self.drone,height, 0.4)
+	dp.hover(self.drone,height)
+		
+	#record intial drone position
+	pos2 = self.getPosition(height)
+	if pos2 == None:	
+	    print("not pos2 lock")
+	    return False
+	print("pos2 lock")
+	print(pos2)
+	
+	#align drone rotation with base rotation
+	compensationAngle = self.calcComp(pos1.x,pos1.y,pos2.x,pos2.y,pos1.detected)
+	#dp.rotateBy(self.drone,self.connection,compensationAngle,height)
+
+
+    """def landDrone(self):
+        print("landing drone")
+	height = 0.4
+		
+	dp.hover(self.drone,height)
+
+	self.matchDroneBaseRotation()
+	
+	
+	#pos = None
+	
+	self.lineUpDrone(self, height)
+	dp.land(self.drone,height)
+	
+	return True"""
+	
+    
+	
+
+    #gives the angle that will can needs to rotate to align with the base
+    def calcComp(self,x1,y1,x2,y2,wall):
+    	X=float(abs(x1-x2))
+	Y=float(abs(y1-y2))
+    	result = None
+    
+    	try:
+            angle = math.degrees(math.atan(Y/X))
+
+            #south wall
+            if wall.south:
+                if ((x1>=x2)and(y1>=y2)):
+                    result = -1*angle
+	        elif ((x1<=x2)and(y1>=y2)):
+                    result = angle
+
+            #east wall
+	    elif wall.east:
+	       	if ((x1>=x2)and(y1<=y2)):
+	            result = (-1*(angle+90))
+	        elif ((x1>=x2)and(y1>=y2)):
+               	    result = -1*(90-angle)
+
+            #north wall
+            elif wall.north:
+            	if ((x1<=x2)and(y1<=y2)):
+                    result = (180-angle)
+            	elif ((x1>=x2)and(y1<=y2)):
+                    result = (-1*(180-angle))
+
+            #west wall
+            elif wall.west:
+            	if ((x1<=x2)and(y1>=y2)):
+                    result = (90-angle)
+                elif ((x1<=x2)and(y1<=y2)):
+                    result = (angle+90)
+          
+	except ZeroDivisionError:
+            return "error"
+
+	if result == None:
+	    return None
+	
+	if result >= 360:
+            result -= 360
+
+	compensationAngle = result
+	return result
+    

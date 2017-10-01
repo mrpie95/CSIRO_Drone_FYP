@@ -44,7 +44,9 @@ class imageProcessing():
     #camera input - raspberry pi camera 
     cam = PiCamera()
     videoStream = None
-    debug = False    
+    debug = False   
+
+    area = 300 
     
     #HSV color range for blue and green LEDs used on the drone
     yellowUpper = YELLOW_UPPER
@@ -79,6 +81,8 @@ class imageProcessing():
             cv2.createTrackbar('S-u', 'controls', 0,255, self.nothing)
             cv2.createTrackbar('V-u', 'controls', 0,255, self.nothing)
 
+	    cv2.createTrackbar('Area', 'controls', 0,1000, self.nothing)
+
             cv2.setTrackbarPos('H-l', 'controls', self.yellowLower[0])
 	    cv2.setTrackbarPos('S-l', 'controls', self.yellowLower[1])
             cv2.setTrackbarPos('V-l', 'controls', self.yellowLower[2])
@@ -86,6 +90,8 @@ class imageProcessing():
             cv2.setTrackbarPos('H-u', 'controls', self.yellowUpper[0])
             cv2.setTrackbarPos('S-u', 'controls', self.yellowUpper[1])
             cv2.setTrackbarPos('V-u', 'controls', self.yellowUpper[2])
+
+   	    cv2.setTrackbarPos('Area', 'controls', self.area)
 	    
     
     #image processing required to get a specificColour
@@ -98,6 +104,7 @@ class imageProcessing():
         if (self.debug):
 	    self.yellowLower = np.array([cv2.getTrackbarPos('H-l','controls'), cv2.getTrackbarPos('S-l','controls'), cv2.getTrackbarPos('V-l','controls')])
   	    self.yellowUpper = np.array([cv2.getTrackbarPos('H-u','controls'), cv2.getTrackbarPos('S-u','controls'), cv2.getTrackbarPos('V-u','controls')])
+	    self.area = cv2.getTrackbarPos('Area','controls')
 
         #processing creates a binary image containg only colours defined in the range
         processedImage = cv2.inRange(processedImage, self.yellowLower, self.yellowUpper)
@@ -112,6 +119,8 @@ class imageProcessing():
     def drawDrone(self,image,x,y):
     	#draws a circle at the center of the drone
 	cv2.circle(image, (x,y), 20, (20,255,255), thickness=-1,lineType=8, shift=0) 
+	cv2.circle(image, (x,y), 5, (0,0,255), thickness=3,lineType=8, shift=0) 
+	
 	posX = x+40
         posY = y 
         cv2.putText(img=image, text=("x: "+str(x)+" y: "+str(y)), org=(x,y), fontFace=self.FONT, color=(255,255,255),fontScale=0.5, lineType=cv2.LINE_AA)
@@ -148,7 +157,10 @@ class imageProcessing():
 	    colour = self.YELLOW	
 	cv2.rectangle(img=image,pt1=self.WEST_PT1, pt2=self.WEST_PT2,color=colour,thickness=-1,lineType=8, shift=0) 
 
-    	#calculate the position of largest contour in the image
+	cv2.circle(img=image,center=(150,150),radius=30
+,color=(0,255,0),thickness=-1,lineType=8, shift=0) 
+
+    #calculate the position of largest contour in the image
     def calculatePosition(self, image):
         x = None
         y = None
@@ -161,6 +173,7 @@ class imageProcessing():
         if len(cnts) > 0:
             #use only the largest contour
             c = max(cnts, key=cv2.contourArea)
+	   
             ((x,y), radius) = cv2.minEnclosingCircle(c)
             M = cv2.moments(c)
                         
@@ -171,8 +184,8 @@ class imageProcessing():
                     y = int(M["m01"] / M["m00"])
                     radius = int(radius)                    
                 
-                    #center = (x, self.y)
-                    return (x,y,radius)
+		    if (M["m00"] > self.area):
+	            	return (x,y,radius)
                 
                 except ZeroDivisionError, Argument:
                     print("error") 
@@ -227,20 +240,22 @@ class imageProcessing():
 	    posX = dronePos[0]
             posY = dronePos[1]
 
-            #draw drone
-	    self.drawDrone(HUD, posX, posY)
-
+            
 	    #check all zones for drone and highlight them if the drone is in them 
             zones = self.checkZones(posX,posY)
 	    self.drawHUD(HUD,zones.north,zones.east,zones.south,zones.west)
 	    	
 	    currentPos = dt.droneData(x=posX, y=posY, detected=zones)
 
+	    #draw drone
+	    self.drawDrone(HUD, posX, posY)
+
 	else:
 	    self.drawHUD(HUD,False,False,False,False)        
     	
     	#draw all windows
     	cv2.imshow("Original", image)
+	cv2.imshow("Processed Image", yellowImage)
 	cv2.imshow("HUD", HUD)
 	key = cv2.waitKey(1) & 0xFF
 
