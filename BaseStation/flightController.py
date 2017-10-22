@@ -14,10 +14,12 @@ class flightController:
     camera = None
     connection = None
    
+    lastDetected = None
+
     #initialise camera and drone connnections    
     def __init__(self, scf):
 	print("Initialising the camera")
-	self.camera = ip.imageProcessing(self.RESOLUTION, False)
+	self.camera = ip.imageProcessing(self.RESOLUTION, True)
 	time.sleep(2)
         self.connection = scf
         print("Initialising the drone base connetion")
@@ -48,13 +50,17 @@ class flightController:
 	dp.incrementLeft(self.drone,0.3)
 	dp.incrementLeft(self.drone,0.3)
 	
-	    
-    def emergencyLand(self):
-	dp.quickLand(self.drone,0.3)
-	#dp.land(self.drone, 0.4)
 	
     def readCamera(self):
 	return self.camera.readStream()
+
+    #this funciton will bring the drone into land
+    #currently it is assumed that GPS has brought in the drone
+    #close enough to do a close proximity search
+    def bringDroneHome(self,height):
+	if (self.searchForBase(height)):
+	    self.land(height)
+	
 
     #gets the drones position with safety incase loss of drone image
     def getPosition(self,height):
@@ -146,9 +152,17 @@ class flightController:
     #line up drone to the center of the base
     def lineUpDrone(self,height,accuracy, increment):	    
 	endTime = time.time() + 10
+	
+	checkRot = 0;	
 
         while(True):
 	    dp.hover(self.drone,height)
+	
+	    checkRot += 1
+
+	    if checkRot > 10: 
+		self.rotDrone2Base(height)
+		checkRot = 0
 
             pos = self.getPosition(height)
 	    if(self.checkAlignment(height,"center",accuracy)):
@@ -180,33 +194,32 @@ class flightController:
 	while (row < 8):
 	    for xAxis in range(3):
 	    	if ((row%2) == 0):
-		    dp.incrementForward(self.drone,height,0.3)
+		    dp.incrementForward(self.drone,height,0.2)
 		    if self.getPosition(height) != None:
-	            	return true;
+	            	return True;
 	        else:
-	            dp.incrementBackward(self.drone,height,0.3)
+	            dp.incrementBackward(self.drone,height,0.2)
 		    if self.getPosition(height) != None:
-	            	return true;
+	            	return True;
 	    for yAxis in range(2):
-	    	    dp.incrementRight(self.drone,height,0.15)
+	    	    dp.incrementRight(self.drone,height,0.1)
 		    if self.getPosition(height) != None:
-	            	return true;
+	            	return True;
 	    row += 1
 	print("base not found")
 	print("retrying GPS to relocate base area")
 	return false 
 
 
-    def land(self,drone,h):
+    def land(self, h):
 	print("landing drone")
 	height = h
 	
 	self.rotDrone2Base(height)
 
-
 	print("First stage")	
 	dp.hover(self.drone,height)
-	self.lineUpDrone(height,12,0.02)
+	self.lineUpDrone(height,12,0.03)
 
 	height = 0.25
 

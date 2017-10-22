@@ -47,6 +47,8 @@ class imageProcessing():
     debug = False   
 
     area = 300 
+
+    bgImage = None
     
     #HSV color range for blue and green LEDs used on the drone
     yellowUpper = YELLOW_UPPER
@@ -92,7 +94,14 @@ class imageProcessing():
             cv2.setTrackbarPos('V-u', 'controls', self.yellowUpper[2])
 
    	    cv2.setTrackbarPos('Area', 'controls', self.area)
-	    
+
+	#self.bgImage = cv2.createBackgroundSubtractorKNN()
+	
+	#self.cam.capture(self.videoStream, format="bgr", use_video_port=True)
+        #self.bgImage = self.processImage(self.videoStream.array)
+
+	#self.videoStream.truncate()
+	#self.videoStream.seek(0)
     
     #image processing required to get a specificColour
     def processImage(self, image):
@@ -169,6 +178,26 @@ class imageProcessing():
          #find all countour in the image
         cnts = cv2.findContours(image.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
         center = None
+	
+	"""for cnt in cnts:
+	    peri = cv2.arcLength(cnt,True)
+	    approx = cv2.approxPolyDP(cnt, 0.04*peri, True)
+	  
+            M = cv2.moments(cnt)
+	    if (M["m00"] > 1000):
+   	   	if len(approx) > 4:
+	 	    print("detected") 
+		    ((x,y), radius) = cv2.minEnclosingCircle(cnt)
+
+		    try:
+                    	x = int(M["m10"] / M["m00"])
+	                y = int(M["m01"] / M["m00"])
+        	        radius = int(radius)                    
+                
+			return (x,y,radius)
+                
+	            except ZeroDivisionError, Argument:
+                    	print("error") """
         
         if len(cnts) > 0:
             #use only the largest contour
@@ -188,7 +217,7 @@ class imageProcessing():
 	            	return (x,y,radius)
                 
                 except ZeroDivisionError, Argument:
-                    print("error") 
+                    print("error")
         return None
 
     #checks if the drone is in any detection zones
@@ -230,6 +259,11 @@ class imageProcessing():
         self.cam.capture(self.videoStream, format="bgr", use_video_port=True)
         image = self.videoStream.array
 
+	#background removal attempt
+	#image = cv2.absdiff(image, self.bgImage)
+	
+	#image = self.bgImage.apply(image)
+	
         #get the binary image using the defined colour range
         yellowImage = self.processImage(image)
 

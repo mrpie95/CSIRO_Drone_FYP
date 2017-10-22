@@ -29,19 +29,15 @@ if __name__ == '__main__':
 	#baseStation.testFlight()
 	#baseStation.hoverAboveBase(height)
 	#baseStation.rotDrone2Base(height)
-
-	baseStation.searchForBase(height)
+	#baseStation.getPosition(0.4)
+	#baseStation.bringDroneHome(height)
 
 	#baseStation.testFlight()
 	#baseStation.emergencyLand()
 	
-	"""while(True):
-	    statues = baseStation.approuchBase()
-   	    print(statues)
-            if (statues):
-	        print("approuch complete")
-	        baseStation.landDrone()
-	        break"""
+	while(True):
+	    x = 0
+	    baseStation.readCamera()
 	
 	""""while(True):
 	    #baseStation.readCamera()
