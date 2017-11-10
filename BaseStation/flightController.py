@@ -25,6 +25,55 @@ class flightController:
         print("Initialising the drone base connetion")
         self.drone = dp.initDrone(self.connection)
 
+    def flyDroneTo(self):
+	height = 0.4
+	dp.takeoff(self.drone,height)
+
+	self.moveToPoint(4,4,6,6,0.5)
+	#dp.hover_for(self.drone,height,500)
+	dp.rotateBy(self.drone, self.connection,180, height)
+	self.moveToPoint(6,6,4,4,0.5)
+	if (self.getPosition == None):
+		searchForBase(0.5)
+	self.land(0.4)
+	print("mission complete")
+	
+    #current grid covers approximatley ~ 2m^2 and is split into 8 divisions
+    #x and y define a grid relative to the base
+    def moveToPoint(self,x1,y1,x2,y2,h):
+	    
+	    deltaX = x2-x1;
+	    deltaY = x1-y1;
+
+	    print(abs(deltaX))
+	    print(abs(deltaY))
+
+	    print("moving to point")
+	    if (deltaX != 0):
+		    for xAxis in range(abs(deltaX)):
+			print("x")
+	
+		    	if (deltaX > 0):
+			    dp.incrementRight(self.drone,h,0.1)
+			elif(deltaX < 0):
+			    dp.incrementLeft(self.drone,h,0.1)
+
+	    if (deltaY != 0):
+		    for yAxis in range(abs(deltaY)):
+			print("y")
+	
+			if (deltaY > 0):
+			    dp.incrementForward(self.drone,h,0.2)
+			elif(deltaY < 0):
+		    	    dp.incrementBackward(self.drone,h,0.2)
+	    	
+
+
+	
+
+
+
+
     def hoverAboveBase(self, height):
         dp.takeoff(self.drone,height)
 	
@@ -187,9 +236,6 @@ class flightController:
 
 	dp.hover(self.drone,height)
 	
-	#pos = self.getPosition(height)
-	#if pos != None:
-	    #return true
 	row = 0
 	while (row < 8):
 	    for xAxis in range(3):

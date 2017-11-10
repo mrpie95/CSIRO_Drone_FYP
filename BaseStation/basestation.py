@@ -26,6 +26,8 @@ if __name__ == '__main__':
 	
     with SyncCrazyflie(URI) as scf:  
 	baseStation = fc.flightController(scf)
+	baseStation.flyDroneTo();
+
 	#baseStation.testFlight()
 	#baseStation.hoverAboveBase(height)
 	#baseStation.rotDrone2Base(height)
@@ -35,11 +37,11 @@ if __name__ == '__main__':
 	#baseStation.testFlight()
 	#baseStation.emergencyLand()
 	
-	while(True):
+	"""while(True):
 	    x = 0
 	    baseStation.readCamera()
 	
-	""""while(True):
+	while(True):
 	    #baseStation.readCamera()
 	    statues = baseStation.approuchBase()
    	    print(statues)
