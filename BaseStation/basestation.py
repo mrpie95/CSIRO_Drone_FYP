@@ -18,50 +18,54 @@ logging.basicConfig(level=logging.ERROR)
 
 
 if __name__ == '__main__':
+	 
+    print("1 - debug mode (preset coordinantes")
+    print("2 - cam calibration")
+    print("3 - demo day program\n")
+    input = raw_input("Enter the program mode: ")
+
     # Initialize the low-level drivers (don't list the debug drivers)
     cflib.crtp.init_drivers(enable_debug_driver=False)
 
     #>>>Program Starts Here<<<
-    height = 0.3
+    height = 0.4
+	
 	
     with SyncCrazyflie(URI) as scf:  
-	baseStation = fc.flightController(scf)
-	baseStation.flyDroneTo();
-
-	#baseStation.testFlight()
-	#baseStation.hoverAboveBase(height)
-	#baseStation.rotDrone2Base(height)
-	#baseStation.getPosition(0.4)
-	#baseStation.bringDroneHome(height)
-
-	#baseStation.testFlight()
-	#baseStation.emergencyLand()
+	baseStation = fc.flightController(scf,height)
 	
-	"""while(True):
-	    x = 0
-	    baseStation.readCamera()
+	if (input == "1"):
+	    missions = []
+	    missions.append([]) 
+	    missions.append([])
 	
-	while(True):
-	    #baseStation.readCamera()
-	    statues = baseStation.approuchBase()
-   	    print(statues)
-            if (statues):
-	    	baseStation.landDrone()"""
-
-	
-	#if (statues):
-	   # baseStation.landDrone()
-	
-
+	    #first coordinates
+	    missions[0].append(0.5)
+	    missions[0].append(0.5)
+	    missions[0].append(20)
 		
-   	"""statues = baseStation.approuchBase()
-	while(True):
-    	baseStation.testFlight()
-    	baseStation.emergencyLand()
+	    baseStation.flyDroneTo(missions[0])
 	
-    	if (statues):
-	baseStation.landDrone()
-   	else:
-	    print("Drone missing, emergency")
-		baseStation.emergencyLand()"""
+	elif (input == "2"):
+	    while True:
+		baseStation.readCamera()
+	
+	elif (input == "3"):
+	    missions = []
+	    missions.append([]) 
+	    missions.append([])
+	
+	    x = float(raw_input("Enter the x coordinante: "))
+	    y = float(raw_input("Enter the y coordinante: "))
+	    time = int(raw_input("Enter the sampling time: "))
+    
+	    missions[0].append(x)
+	    missions[0].append(y)
+	    missions[0].append(time)
+	
+	    baseStation.flyDroneTo(missions[0])
+	
+	
+	    
+
             

@@ -38,15 +38,19 @@ class imageProcessing():
     WHITE = (255,255,255)
   
     #Upper and lowers range for colour dection
-    YELLOW_UPPER = np.array([84,255,255])
-    YELLOW_LOWER = np.array([26,93,93])
+    YELLOW_UPPER = np.array([179,255,255])
+    YELLOW_LOWER = np.array([134,59,203])
+
+
+    #YELLOW_UPPER = np.array([84,255,255])
+    #YELLOW_LOWER = np.array([26,120,93])
 
     #camera input - raspberry pi camera 
     cam = PiCamera()
     videoStream = None
     debug = False   
 
-    area = 300 
+    area = 126 
 
     bgImage = None
     
@@ -64,11 +68,13 @@ class imageProcessing():
     	#settings used for camera caputring
 	self.debug = debug
         self.cam.resolution = resolution
-        self.cam.exposure_mode = 'backlight'
-	self.cam.awb_mode = 'flash'
+        self.cam.exposure_mode = 'auto'
+	#self.cam.exposure_mode = 'backlight'
+	self.cam.awb_mode = 'auto'
+	self.cam.saturation = 100
         self.cam.hflip = True
-        self.cam.exposure_compensation = 25
-        self.cam.framerate = 60
+        #self.cam.exposure_compensation = 25
+        #self.cam.framerate = 10
         self.videoStream = PiRGBArray(self.cam, size=self.RESOLUTION)
         
         #Sliders used to fine tune the colour detecitons
@@ -166,8 +172,7 @@ class imageProcessing():
 	    colour = self.YELLOW	
 	cv2.rectangle(img=image,pt1=self.WEST_PT1, pt2=self.WEST_PT2,color=colour,thickness=-1,lineType=8, shift=0) 
 
-	cv2.circle(img=image,center=(150,150),radius=30
-,color=(0,255,0),thickness=-1,lineType=8, shift=0) 
+	cv2.circle(img=image,center=(180,120),radius=40,color=(0,255,0),thickness=-1,lineType=8, shift=0) 
 
     #calculate the position of largest contour in the image
     def calculatePosition(self, image):

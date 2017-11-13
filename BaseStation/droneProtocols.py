@@ -18,6 +18,7 @@ INCREMENT_SIZE = 0.02
 
 ANGLE_ACCURACY = 7.5
 
+ROLL_ADJUST = 0.5;
 #performs intialisations required the drone to fly
 def initDrone(scf):
         cf = scf.cf
@@ -63,17 +64,19 @@ def quickLand(cf, height):
 #lands the drone in a smooth but quick manner
 def land(cf, height):
     droneHeight = height
-    cf.commander.send_hover_setpoint(0,0,0,droneHeight)
+    cf.commander.send_hover_setpoint(0,0,ROLL_ADJUST,droneHeight)
 
     print("landing")
     for _ in range(10):	
-        cf.commander.send_hover_setpoint(0,0,0,droneHeight)
+        cf.commander.send_hover_setpoint(0,0,ROLL_ADJUST,droneHeight)
 	#time.sleep(0.02)
-        droneHeight = droneHeight - 0.05
+        droneHeight = droneHeight - 0.1
 	if droneHeight < 0.35:
 	    cf.commander.send_hover_setpoint(0,0,0,0)
 	    break
+    cf.commander.send_hover_setpoint(0,0,0,0)
     print("done")
+
 
 #hovers the drone in place at a set height (m) and set time (mS)
 def hover_for(cf, height, timeSet):
@@ -84,33 +87,38 @@ def hover_for(cf, height, timeSet):
     
 
 #hovers the drone in place at a set height (m) and set time (mS)
+def hover2(cf, height, time):
+    #print("hovering")
+    cf.commander.send_hover_setpoint(0,0,ROLL_ADJUST,height)
+    time.sleep(time)
+
+#hovers the drone in place at a set height (m) and set time (mS)
 def hover(cf, height):
     #print("hovering")
     for _ in range(1):	
-        cf.commander.send_hover_setpoint(0,0,0,height)
+        cf.commander.send_hover_setpoint(0,0,ROLL_ADJUST,height)
 	time.sleep(0.1)
  
 #rotates the drone to the specified angle
 def rotateBy(cf, scf, angle, height):
-    print("rotating")
-    droneAngle = getDirection(scf)
-    finalAngle = droneAngle + angle
+    #print("rotating")
 
-    #rate of rotation in deg/s
-        
+    droneAngle = getDirection(scf)
 	
-    if angle > 0:
-    	rotRate = -40    
-    else:
-	rotRate = 40
+    finalAngle = droneAngle + angle	
+    if (finalAngle > 180):
+	finalAngle = -180 + (finalAngle-180)
+
+ 
+    #rate of rotation in deg/s
+    if (angle < 0):
+	rotRate = 90
+    else: 
+	rotRate = -90   
+
 
     while(True):
         droneAngle = getDirection(scf)
-	print(finalAngle)
-	print(droneAngle)
-
-        #if droneAngle >= finalAngle:
-         #   rotRate = -1*rotRate
 
     	if ((finalAngle <= (droneAngle+ANGLE_ACCURACY)) and (finalAngle >= (droneAngle-ANGLE_ACCURACY))):
     	    break
@@ -121,30 +129,40 @@ def rotateBy(cf, scf, angle, height):
 #moves the drone a set distance forward
 def incrementForward(cf, height, increment):
     for _ in range(10):	
-        cf.commander.send_hover_setpoint(increment,0,0,height)
+        cf.commander.send_hover_setpoint(increment,0,ROLL_ADJUST,height)
         time.sleep(0.1)
-    print("moved forward")
+    #print("moved forward")
+
+def incrementForward_for(cf, height, increment, time):
+    count = 0
+    while True:
+        if count > time:
+	    break
+
+	incrementForward(cf, height, increment)
+	count = count+1
+	
 
 #moves the drone a set distance backward
 def incrementBackward(cf, height, increment):
     for _ in range(10):	
-        cf.commander.send_hover_setpoint(-1*increment,0,0,height)
+        cf.commander.send_hover_setpoint(-1*increment,0,ROLL_ADJUST,height)
         time.sleep(0.1)
-    print("moved backward")
+    #print("moved backward")
 
 #moves the drone a set distance forward
 def incrementRight(cf, height, increment):
     for _ in range(10):	
-        cf.commander.send_hover_setpoint(0,-1*increment,0,height)
+        cf.commander.send_hover_setpoint(0,-1*increment,ROLL_ADJUST,height)
         time.sleep(0.1)
-    print("moved right")
+    #print("moved right")
 
 #moves the drone a set distance backward
 def incrementLeft(cf, height, increment):
     for _ in range(10):	
-        cf.commander.send_hover_setpoint(0,increment,0,height)
+        cf.commander.send_hover_setpoint(0,increment,ROLL_ADJUST,height)
         time.sleep(0.1)
-    print("moved left")
+    #print("moved left")
 
 
 

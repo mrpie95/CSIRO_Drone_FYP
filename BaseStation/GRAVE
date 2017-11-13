@@ -1,3 +1,103 @@
+
+ #blind spiral method- spirals out until it finds the base
+    def searchForBase(self):	
+        print("Looking for base station")
+	
+	xAxis = 0
+	yAxis = 0
+
+	dp.hover(self.drone,self.height)
+	stepSize = 2
+
+	iteration = 1;
+	count = 1
+	
+	while (iteration < 8):
+	    print(iteration)
+	    print(count)
+            if count == 1:
+		i = 0
+	        while(i < stepSize*iteration):
+		    dp.incrementForward(self.drone,self.height,0.1)
+		    i = i+1
+		    
+            elif count == 2:
+		i = 0
+	        while(i < stepSize*iteration):
+		    dp.incrementLeft(self.drone,self.height,0.1)
+		    i = i+1
+	    elif count == 3:
+		i = 0
+	        while(i < stepSize*iteration):
+		    dp.incrementBackward(self.drone,self.height,0.1)
+		    i = i+1
+	    elif count == 4:
+		i = 0
+	        while(i < stepSize*iteration):
+		    dp.incrementRight(self.drone,self.height,0.1)
+		    i = i+1
+		
+	    iteration = iteration + 1
+
+   	    if count == 4:
+		count = 0
+	    else:
+	    	count = count + 1
+	
+	
+	return False 
+
+
+"""
+	row = 0
+	while (row < 8):
+	    for xAxis in range(3):
+	    	if ((row%2) == 0):
+		    dp.incrementForward(self.drone,self.height,0.2)
+		    if self.getPosition(self.height) != None:
+	            	return True;
+	        else:
+	            dp.incrementBackward(self.drone,self.height,0.2)
+		    if self.getPosition(self.height) != None:
+	            	return True;
+	    for yAxis in range(2):
+	    	    dp.incrementRight(self.drone,self.height,0.1)
+		    if self.getPosition(self.height) != None:
+	            	return True;
+	    row += 1
+	print("base not found")
+	print("retrying GPS to relocate base area")"""  
+
+
+def moveToPoint(self,x1,y1,x2,y2,h):
+	    
+	    deltaX = x2-x1;
+	    deltaY = x1-y1;
+
+	    print(abs(deltaX))
+	    print(abs(deltaY))
+
+	    print("moving to point")
+	    if (deltaX != 0):
+		    for xAxis in range(abs(deltaX)):
+			print("x")
+	
+		    	if (deltaX > 0):
+			    dp.incrementRight(self.drone,h,0.1)
+			elif(deltaX < 0):
+			    dp.incrementLeft(self.drone,h,0.1)
+
+	    if (deltaY != 0):
+		    for yAxis in range(abs(deltaY)):
+			print("y")
+	
+			if (deltaY > 0):
+			    dp.incrementForward(self.drone,h,0.2)
+			elif(deltaY < 0):
+		    	    dp.incrementBackward(self.drone,h,0.2)
+
+
+
 #droneData = camera.readStream()
 	    
             if droneData != None:
