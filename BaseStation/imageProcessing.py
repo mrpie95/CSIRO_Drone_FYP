@@ -184,6 +184,7 @@ class imageProcessing():
         cnts = cv2.findContours(image.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
         center = None
 	
+	#work in progress :( please get a dedicated person to do 
 	"""for cnt in cnts:
 	    peri = cv2.arcLength(cnt,True)
 	    approx = cv2.approxPolyDP(cnt, 0.04*peri, True)
@@ -231,6 +232,8 @@ class imageProcessing():
         east = False
 	south = False
 	west = False
+	
+	#super old code still visible in hud though...
 	    	
 	#area checks for each zone
 	if ((x > self.NORTH_PT1[0]) and (x < self.NORTH_PT2[0]) and (y > self.NORTH_PT1[1]) and (y < self.NORTH_PT2[1])):

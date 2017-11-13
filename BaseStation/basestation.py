@@ -5,8 +5,8 @@ import imageProcessing as ip
 import flightController as fc
 import cflib.crtp
 
+#radio channel of drone 1
 URI = "radio://0/80/250K"
-
 
 from cflib.crazyflie.log import LogConfig
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
@@ -27,13 +27,13 @@ if __name__ == '__main__':
     # Initialize the low-level drivers (don't list the debug drivers)
     cflib.crtp.init_drivers(enable_debug_driver=False)
 
-    #>>>Program Starts Here<<<
+    #height that the drone will cruise at
     height = 0.4
-	
 	
     with SyncCrazyflie(URI) as scf:  
 	baseStation = fc.flightController(scf,height)
 	
+	#menu logic
 	if (input == "1"):
 	    missions = []
 	    missions.append([]) 

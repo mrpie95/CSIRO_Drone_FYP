@@ -15,10 +15,9 @@ from cflib.crazyflie.syncLogger import SyncLogger
 logging.basicConfig(level=logging.ERROR)
 
 INCREMENT_SIZE = 0.02
-
 ANGLE_ACCURACY = 7.5
+ROLL_ADJUST = 0.5
 
-ROLL_ADJUST = 0.5;
 #performs intialisations required the drone to fly
 def initDrone(scf):
         cf = scf.cf
@@ -46,6 +45,7 @@ def takeoff(cf, height):
 	time.sleep(0.1)
     hover(cf, height)
 
+#alternative takeoff method
 def takeoff2(cf, height):
     print("hovering")	
     cf.commander.send_hover_setpoint(0,0,0,0.4)
@@ -54,10 +54,8 @@ def takeoff2(cf, height):
     print("tookoff")
     hover(cf, height)
 
-def quickLand(cf, height):
-  
-    
-   
+#very quick landing aka ... dropping out of the sky
+def quickLand(cf, height):   
     cf.commander.send_hover_setpoint(0,0,0,0)      
     
 
@@ -108,14 +106,12 @@ def rotateBy(cf, scf, angle, height):
     finalAngle = droneAngle + angle	
     if (finalAngle > 180):
 	finalAngle = -180 + (finalAngle-180)
-
  
     #rate of rotation in deg/s
     if (angle < 0):
 	rotRate = 90
     else: 
 	rotRate = -90   
-
 
     while(True):
         droneAngle = getDirection(scf)
@@ -132,6 +128,7 @@ def incrementForward(cf, height, increment):
         cf.commander.send_hover_setpoint(increment,0,ROLL_ADJUST,height)
         time.sleep(0.1)
     #print("moved forward")
+
 
 def incrementForward_for(cf, height, increment, time):
     count = 0
